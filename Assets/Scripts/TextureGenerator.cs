@@ -6,7 +6,8 @@ public static class TextureGenerator {
 
     public static Texture2D TextureFromColorMap(Color[] colorMap, int mapWidth, int mapHeight) {
         Texture2D texture = new Texture2D(mapWidth, mapHeight);
-
+        texture.filterMode = FilterMode.Point;
+        texture.wrapMode = TextureWrapMode.Clamp;
         texture.SetPixels(colorMap);
         texture.Apply();
 

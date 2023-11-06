@@ -4,10 +4,8 @@ using System.Security.Cryptography.X509Certificates;
 using UnityEditor;
 using UnityEngine;
 
-public static class Noise {
-
-    public enum NormalizeMode {Local, Global}
-    public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, float scale, int seed, int octaves, float persistance, float lacunarity, Vector2 offset, NormalizeMode normalizeMode) {
+public static class CollectableNoise {
+    public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, float scale, int seed, int octaves, float persistance, float lacunarity, Vector2 offset) {
         float[,] noiseMap = new float[mapWidth, mapHeight];
 
 
@@ -65,15 +63,17 @@ public static class Noise {
 
          for (int y = 0; y < mapHeight; y++) {
             for (int x = 0; x < mapWidth; x++) {
-                if(normalizeMode == NormalizeMode.Local) {
-                    noiseMap[x,y] = Mathf.InverseLerp(minLocalNoiseHeight,maxLocalNoiseHeight,noiseMap[x,y]);
-                }else {
-                    float normalizedHeight = (noiseMap[x,y] + 1) / (maxPossibleHeight * 0.9f);
-                    noiseMap[x,y] = Mathf.Clamp(normalizedHeight, 0, int.MaxValue);
-                }
+                noiseMap[x,y] = Mathf.InverseLerp(minLocalNoiseHeight,maxLocalNoiseHeight,noiseMap[x,y]);
+            }
+         }
+
+         for (int y = 0; y < mapHeight; y++) {
+            for (int x = 0; x < mapWidth; x++) {
+                noiseMap[x,y] = noiseMap[x,y] > 0.85 ? 1 : 0;
             }
          }
 
         return noiseMap;
     }
 }
+

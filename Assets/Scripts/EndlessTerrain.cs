@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Animations;
 
@@ -109,12 +110,16 @@ public class EndlessTerrain : MonoBehaviour {
         }
 
         void OnCollectableReceived(CollectableData collectableData) {
-            for (int y = 0; y < collectableData.collectablesMap.GetLength(0); y++) {
-                for (int x = 0; x < collectableData.collectablesMap.GetLength(1); x++) {
-                    if(collectableData.collectablesMap[x,y] == 1){
-                       GameObject collectable =  GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            for (int y = 0; y < collectableData.collectablesMap.GetLength(1); y++) {
+                for (int x = 0; x < collectableData.collectablesMap.GetLength(0); x++) {
+                    if(collectableData.collectablesMap[x,y] <= 0.42f && collectableData.collectablesMap[x,y] >= 0.40f){
+                       float height = mapGenerator.meshHeightCurve.Evaluate(mapData.heightMap[x,y]) * mapGenerator.meshHeightMultiplier;
+                       var tree = Resources.Load("Prefabs/Tree") as GameObject;
+                        GameObject collectable = Instantiate(tree, Vector3.one, Quaternion.identity);
+                       Vector3 collectablePosition = new Vector3(position.x - (MapGenerator.mapChunkSize / 2f) + x, height + collectable.transform.localScale.y, position.y + (MapGenerator.mapChunkSize/ 2f) - y);
+                       collectable.transform.localPosition = collectablePosition;
                        collectable.transform.parent = meshObject.transform.parent;
-                       collectable.transform.localPosition = new Vector3(position.x + x/2 , mapData.heightMap[x,y],position.y + y / 2);
+                       collectable.transform.position = collectablePosition;
                        
                     }
                 }

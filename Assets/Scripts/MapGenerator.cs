@@ -48,7 +48,7 @@ public class MapGenerator : MonoBehaviour {
         } else if (drawMode == DrawMode.Mesh) {
             display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve), TextureGenerator.TextureFromColorMap(mapData.colorMap, mapChunkSize, mapChunkSize));
         } else if(drawMode == DrawMode.Collectables) {
-            display.DrawTexture(TextureGenerator.TextureFromHeightMap(CollectablesGenerator.GenerateCollectables(mapChunkSize + 2, mapChunkSize + 2, noiseScale, seed, octaves, persistance, lacunarity, offset).collectablesMap));
+            display.DrawTexture(TextureGenerator.TextureFromHeightMap(CollectablesGenerator.GenerateCollectables(mapChunkSize, mapChunkSize, noiseScale, seed, octaves, persistance, lacunarity, offset).collectablesMap));
         }
     }
 
@@ -90,7 +90,7 @@ public class MapGenerator : MonoBehaviour {
     }
 
     void CollectableDataThread(Vector2 center, Action<CollectableData> callback) {
-        CollectableData collectableData = CollectablesGenerator.GenerateCollectables(mapChunkSize + 2, mapChunkSize + 2, noiseScale, seed, octaves, persistance, lacunarity, center + offset);
+        CollectableData collectableData = CollectablesGenerator.GenerateCollectables(mapChunkSize, mapChunkSize, noiseScale, seed, octaves, persistance, lacunarity, center + offset);
         lock(collectableDataThreadInfoQueue) {
             collectableDataThreadInfoQueue.Enqueue(new MapThreadInfo<CollectableData>(callback, collectableData));
         }

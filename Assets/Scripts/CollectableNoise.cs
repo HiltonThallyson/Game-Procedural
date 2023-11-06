@@ -13,7 +13,7 @@ public static class CollectableNoise {
         Vector2[] octavesOffsets = new Vector2[octaves];
 
         float maxPossibleHeight = 0;
-        float amplitude = 1;
+        float amplitude = 0.7f;
         float frequency = 1;
 
         for (int i = 0; i < octaves; i++) {
@@ -36,8 +36,8 @@ public static class CollectableNoise {
 
         for (int y = 0; y < mapHeight; y++) {
             for (int x = 0; x < mapWidth; x++) {
-                amplitude = 1;
-                frequency = 1;
+                amplitude = 0.7f;
+                frequency = 1f;
                 float noiseHeight = 0;
 
                 for (int i = 0; i < octaves; i++) {
@@ -64,12 +64,6 @@ public static class CollectableNoise {
          for (int y = 0; y < mapHeight; y++) {
             for (int x = 0; x < mapWidth; x++) {
                 noiseMap[x,y] = Mathf.InverseLerp(minLocalNoiseHeight,maxLocalNoiseHeight,noiseMap[x,y]);
-            }
-         }
-
-         for (int y = 0; y < mapHeight; y++) {
-            for (int x = 0; x < mapWidth; x++) {
-                noiseMap[x,y] = noiseMap[x,y] > 0.85 ? 1 : 0;
             }
          }
 

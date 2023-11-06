@@ -9,6 +9,8 @@ public class MapGenerator : MonoBehaviour {
 
     public DrawMode drawMode;
 
+    public const int mapChunkSize = 45;
+
     public int mapWidth;
     public int mapHeight;
     public float noiseScale;
@@ -22,6 +24,9 @@ public class MapGenerator : MonoBehaviour {
     public float lacunarity;
 
     public bool autoUpdate;
+
+    public float heightMultiplier;
+    public AnimationCurve meshHeightCurve;
 
     public TerrainType[] regions; 
 
@@ -50,7 +55,7 @@ public class MapGenerator : MonoBehaviour {
         } else if (drawMode == DrawMode.ColorMap) {
             display.DrawTexture(TextureGenerator.TextureFromColorMap(colorMap, mapWidth, mapHeight));
         } else if (drawMode == DrawMode.Mesh) {
-            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap), TextureGenerator.TextureFromColorMap(colorMap, mapWidth, mapHeight));
+            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, heightMultiplier, meshHeightCurve), TextureGenerator.TextureFromColorMap(colorMap, mapWidth, mapHeight));
         }
     }
 

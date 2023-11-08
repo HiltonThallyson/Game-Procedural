@@ -14,19 +14,21 @@ public class CaveGenerator : MonoBehaviour {
 
     public Vector3 caveSpawnPosition;
 
+    public bool caveGenerated;
+
     [Range(0,57)]
     public int randomFillPercentage;
 
     int[,] map;
     public List<string> cavesId;
 
-    protected CaveMeshGenerator meshGenerator;
+    public CaveMeshGenerator meshGenerator;
 
     void AddGeneratedCave(string id) {
         cavesId.Add(id);
     }
-    public void GenerateMap(string id) {
-
+    public void GenerateCave(string id) {
+        
         map = new int[width,height];
 
         RandomFillMap(id);
@@ -53,6 +55,7 @@ public class CaveGenerator : MonoBehaviour {
         AddGeneratedCave(id);
         meshGenerator = GetComponent<CaveMeshGenerator>();
         meshGenerator.GenerateMesh(borderedMap, 1);
+        caveGenerated = true;
     }
 
     public void DestroyCave(string id) {
@@ -60,6 +63,7 @@ public class CaveGenerator : MonoBehaviour {
             if(meshGenerator != null) {
                 meshGenerator.DestroyMesh();
                 RemoveGeneratedCave(id);
+                caveGenerated = false;
             }
         }
     }
@@ -75,6 +79,7 @@ public class CaveGenerator : MonoBehaviour {
                     int xCoord = tile.tileX;
                     int yCoord = tile.tileY;
                     if(map[xCoord, yCoord] == 0) {
+                        if(map[xCoord, yCoord] == 0)
                         caveSpawnPosition = new Vector3(xCoord/10, -8 - 13, yCoord/10);
                         return;
                     }

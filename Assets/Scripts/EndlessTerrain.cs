@@ -24,7 +24,7 @@ public class EndlessTerrain : MonoBehaviour {
     Dictionary<Vector2, TerrainChunck> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunck>();
     static List<TerrainChunck> terrainChuncksVisibleLastUpdate = new List<TerrainChunck>();
 
-    void Start() {
+    public void GenerateTerrain() {
         mapGenerator = FindAnyObjectByType<MapGenerator>();
 
         chunkSize = MapGenerator.mapChunkSize;
@@ -136,7 +136,6 @@ public class EndlessTerrain : MonoBehaviour {
                        Vector3 cavernEntrancesPosition = new Vector3(position.x - (MapGenerator.mapChunkSize / 2f) + x, height + cavernEntrances.transform.localScale.y, position.y + (MapGenerator.mapChunkSize/ 2f) - y);
                        cavernEntrances.transform.localPosition = cavernEntrancesPosition;
                        cavernEntrances.transform.parent = meshObject.transform;
-                       cavernEntrances.transform.position = cavernEntrancesPosition;
                        
                     }
                 }

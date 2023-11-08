@@ -139,6 +139,14 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
+    public void DisableMap() {
+        gameObject.SetActive(false);
+    }
+
+    public void EnabledMap() {
+        gameObject.SetActive(true);
+    }
+
     MapData GenerateMapData(Vector2 center) {
         float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize + 2, mapChunkSize + 2, noiseScale, seed, octaves, persistance, lacunarity, center + offset, normalizeMode);
 

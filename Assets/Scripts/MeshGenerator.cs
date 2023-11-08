@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public static class MeshGenerator {
-
+    
     public static MeshData GenerateTerrainMesh (float[,] heightMap, float heightMultiplier, AnimationCurve _heightCurve) {
         AnimationCurve heightCurve = new AnimationCurve(_heightCurve.keys);
         int borderedSize = heightMap.GetLength(0);

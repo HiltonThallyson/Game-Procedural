@@ -4,7 +4,7 @@ using System.Security.Cryptography.X509Certificates;
 using UnityEditor;
 using UnityEngine;
 
-public static class CollectableNoise {
+public static class CavernEntranceNoise {
     public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, float scale, int seed, int octaves, float persistance, float lacunarity, Vector2 offset) {
         float[,] noiseMap = new float[mapWidth, mapHeight];
 
@@ -13,7 +13,7 @@ public static class CollectableNoise {
         Vector2[] octavesOffsets = new Vector2[octaves];
 
         float maxPossibleHeight = 0;
-        float amplitude = 0.7f;
+        float amplitude = 1f;
         float frequency = 1;
 
         for (int i = 0; i < octaves; i++) {
@@ -34,9 +34,9 @@ public static class CollectableNoise {
         float halfWidth = mapWidth / 2f;
         float halfHeight = mapHeight / 2f;
 
-        for (int y = 0; y < mapHeight; y++) {
-            for (int x = 0; x < mapWidth; x++) {
-                amplitude = 0.7f;
+        for (int y = 0; y < mapHeight; y += pseudoNumberGen.Next(8,10)) {
+            for (int x = 0; x < mapWidth; x += pseudoNumberGen.Next(8,10)) {
+                amplitude = 1f;
                 frequency = 1f;
                 float noiseHeight = 0;
 

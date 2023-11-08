@@ -109,30 +109,49 @@ public class EndlessTerrain : MonoBehaviour {
             UpdateTerrainChunk();
         }
 
-        void OnCollectableReceived(CollectableData collectableData) {
-            for (int y = 0; y < collectableData.collectablesMap.GetLength(1); y++) {
-                for (int x = 0; x < collectableData.collectablesMap.GetLength(0); x++) {
-                    if(collectableData.collectablesMap[x,y] <= 0.42f && collectableData.collectablesMap[x,y] >= 0.40f){
+        void OnTreeDataReceived(TreesData treesData) {
+            var tree = Resources.Load("Prefabs/Tree") as GameObject;
+            for (int y = 0; y < treesData.treesMap.GetLength(1); y++) {
+                for (int x = 0; x < treesData.treesMap.GetLength(0); x++) {
+                    if(treesData.treesMap[x,y] < 0.42f && treesData.treesMap[x,y] > 0.40f){
                        float height = mapGenerator.meshHeightCurve.Evaluate(mapData.heightMap[x,y]) * mapGenerator.meshHeightMultiplier;
-                       var tree = Resources.Load("Prefabs/Tree") as GameObject;
-                        GameObject collectable = Instantiate(tree, Vector3.one, Quaternion.identity);
-                       Vector3 collectablePosition = new Vector3(position.x - (MapGenerator.mapChunkSize / 2f) + x, height + collectable.transform.localScale.y, position.y + (MapGenerator.mapChunkSize/ 2f) - y);
-                       collectable.transform.localPosition = collectablePosition;
-                       collectable.transform.parent = meshObject.transform.parent;
-                       collectable.transform.position = collectablePosition;
+                        GameObject trees = Instantiate(tree, Vector3.one, Quaternion.identity);
+                       Vector3 treesPosition = new Vector3(position.x - (MapGenerator.mapChunkSize / 2f) + x, height + trees.transform.localScale.y, position.y + (MapGenerator.mapChunkSize/ 2f) - y);
+                       trees.transform.localPosition = treesPosition;
+                       trees.transform.parent = meshObject.transform;
+                       trees.transform.position = treesPosition;
                        
                     }
                 }
             }
         }
 
+        void OnCavernsDataReceived(CavernsData cavernsData) {
+            var cavernEntrance = Resources.Load("Prefabs/CavernEntrance") as GameObject;
+            for (int y = 0; y < cavernsData.cavernMap.GetLength(1); y++) {
+                for (int x = 0; x < cavernsData.cavernMap.GetLength(0); x++) {
+                    if(cavernsData.cavernMap[x,y] < 0.75f && cavernsData.cavernMap[x,y] > 0.68f && cavernsData.cavernMap[x,y] != 0f){
+                       float height = mapGenerator.meshHeightCurve.Evaluate(mapData.heightMap[x,y]) * mapGenerator.meshHeightMultiplier;
+                        GameObject cavernEntrances = Instantiate(cavernEntrance, Vector3.one, Quaternion.identity);
+                       Vector3 cavernEntrancesPosition = new Vector3(position.x - (MapGenerator.mapChunkSize / 2f) + x, height + cavernEntrances.transform.localScale.y, position.y + (MapGenerator.mapChunkSize/ 2f) - y);
+                       cavernEntrances.transform.localPosition = cavernEntrancesPosition;
+                       cavernEntrances.transform.parent = meshObject.transform;
+                       cavernEntrances.transform.position = cavernEntrancesPosition;
+                       
+                    }
+                }
+            }
+        }
+
+       
         public void UpdateTerrainChunk () {
             float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
             bool isVisible = viewerDstFromNearestEdge <= 300;
             if(isVisible) {
                 terrainChuncksVisibleLastUpdate.Add(this);
                 meshCollider.sharedMesh = mesh;
-                mapGenerator.RequestCollectableData(position, OnCollectableReceived);
+                mapGenerator.RequestTreesData(position, OnTreeDataReceived);
+                mapGenerator.RequestCavernsData(position, OnCavernsDataReceived);
             }
             SetVisible(isVisible);
         }

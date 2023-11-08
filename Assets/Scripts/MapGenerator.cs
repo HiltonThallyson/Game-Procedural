@@ -6,11 +6,11 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour {
 
-    public enum DrawMode {NoiseMap, ColorMap, Mesh, Collectables}
+    public enum DrawMode {NoiseMap, ColorMap, Mesh, Trees, Caverns}
 
     public DrawMode drawMode;
 
-    public const int mapChunkSize = 100;
+    public const int mapChunkSize = 50;
 
     public Noise.NormalizeMode normalizeMode;
     
@@ -33,7 +33,8 @@ public class MapGenerator : MonoBehaviour {
 
     Queue<MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
     Queue<MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
-    Queue<MapThreadInfo<CollectableData>> collectableDataThreadInfoQueue = new Queue<MapThreadInfo<CollectableData>>();
+    Queue<MapThreadInfo<TreesData>> treesDataThreadInfoQueue = new Queue<MapThreadInfo<TreesData>>();
+    Queue<MapThreadInfo<CavernsData>> cavernsDataThreadInfoQueue = new Queue<MapThreadInfo<CavernsData>>();
 
     public void DrawMapInEditor() {
 
@@ -47,8 +48,10 @@ public class MapGenerator : MonoBehaviour {
             display.DrawTexture(TextureGenerator.TextureFromColorMap(mapData.colorMap, mapChunkSize, mapChunkSize));
         } else if (drawMode == DrawMode.Mesh) {
             display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve), TextureGenerator.TextureFromColorMap(mapData.colorMap, mapChunkSize, mapChunkSize));
-        } else if(drawMode == DrawMode.Collectables) {
-            display.DrawTexture(TextureGenerator.TextureFromHeightMap(CollectablesGenerator.GenerateCollectables(mapChunkSize, mapChunkSize, noiseScale, seed, octaves, persistance, lacunarity, offset).collectablesMap));
+        } else if(drawMode == DrawMode.Trees) {
+            display.DrawTexture(TextureGenerator.TextureFromHeightMap(TreesGenerator.GenerateTrees(mapChunkSize, mapChunkSize, noiseScale, seed, octaves, persistance, lacunarity, offset).treesMap));
+        } else if(drawMode == DrawMode.Caverns) {
+            display.DrawTexture(TextureGenerator.TextureFromHeightMap(CavernsGenerator.GenerateCaverns(mapChunkSize, mapChunkSize, noiseScale, seed, octaves, persistance, lacunarity, offset).cavernMap));
         }
     }
 
@@ -82,17 +85,30 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
-    public void RequestCollectableData(Vector2 center, Action<CollectableData> callback) {
+    public void RequestTreesData(Vector2 center, Action<TreesData> callback) {
         ThreadStart threadStart = delegate {
-            CollectableDataThread(center, callback);
+            TreesDataThread(center, callback);
         };
         new Thread(threadStart).Start();
     }
 
-    void CollectableDataThread(Vector2 center, Action<CollectableData> callback) {
-        CollectableData collectableData = CollectablesGenerator.GenerateCollectables(mapChunkSize, mapChunkSize, noiseScale, seed, octaves, persistance, lacunarity, center + offset);
-        lock(collectableDataThreadInfoQueue) {
-            collectableDataThreadInfoQueue.Enqueue(new MapThreadInfo<CollectableData>(callback, collectableData));
+    void TreesDataThread(Vector2 center, Action<TreesData> callback) {
+        TreesData treesData = TreesGenerator.GenerateTrees(mapChunkSize, mapChunkSize, noiseScale, seed, octaves, persistance, lacunarity, center + offset);
+        lock(treesDataThreadInfoQueue) {
+            treesDataThreadInfoQueue.Enqueue(new MapThreadInfo<TreesData>(callback, treesData));
+        }
+    }
+    public void RequestCavernsData(Vector2 center, Action<CavernsData> callback) {
+        ThreadStart threadStart = delegate {
+            CavernsDataThread(center, callback);
+        };
+        new Thread(threadStart).Start();
+    }
+
+    void CavernsDataThread(Vector2 center, Action<CavernsData> callback) {
+        CavernsData cavernsData = CavernsGenerator.GenerateCaverns(mapChunkSize, mapChunkSize, noiseScale, seed, octaves, persistance, lacunarity, center + offset);
+        lock(cavernsDataThreadInfoQueue) {
+            cavernsDataThreadInfoQueue.Enqueue(new MapThreadInfo<CavernsData>(callback, cavernsData));
         }
     }
 
@@ -109,9 +125,15 @@ public class MapGenerator : MonoBehaviour {
                 threadInfo.callback(threadInfo.parameter);
             }
         }
-        if(collectableDataThreadInfoQueue.Count > 0) {
-            for (int i = 0; i < collectableDataThreadInfoQueue.Count; i++) {
-                MapThreadInfo<CollectableData> threadInfo = collectableDataThreadInfoQueue.Dequeue();
+        if(treesDataThreadInfoQueue.Count > 0) {
+            for (int i = 0; i < treesDataThreadInfoQueue.Count; i++) {
+                MapThreadInfo<TreesData> threadInfo = treesDataThreadInfoQueue.Dequeue();
+                threadInfo.callback(threadInfo.parameter);
+            }
+        }
+        if(cavernsDataThreadInfoQueue.Count > 0) {
+            for (int i = 0; i < cavernsDataThreadInfoQueue.Count; i++) {
+                MapThreadInfo<CavernsData> threadInfo = cavernsDataThreadInfoQueue.Dequeue();
                 threadInfo.callback(threadInfo.parameter);
             }
         }
@@ -179,12 +201,21 @@ public struct MapData {
     }
 }
 
-public struct CollectableData {
-    public float[,] collectablesMap;
+public struct TreesData {
+    public float[,] treesMap;
 
-    public CollectableData(float[,] collectablesNoise)
+    public TreesData(float[,] treesNoise)
     {
-        this.collectablesMap = collectablesNoise;
+        this.treesMap = treesNoise;
     }
 
+}
+
+public struct CavernsData {
+    public float[,] cavernMap;
+
+    public CavernsData(float[,] cavernMap)
+    {
+        this.cavernMap = cavernMap;
+    }
 }

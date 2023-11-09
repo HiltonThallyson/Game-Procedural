@@ -24,15 +24,15 @@ public class CaveEntrance : MonoBehaviour
 
     public void SetPlayerPosition(Rigidbody player) {
         if(!playerInsideCave) {
-            Debug.Log("Entrou na cave");
             gameManager.setIsPlayerInCave(true);
             gameManager.SetPlayerLastPosition(player.transform.position);
             var playerSpawnPosition = gameManager.caveGenerator.caveSpawnPosition;
+            var caveExitPosition = gameManager.caveGenerator.caveExitPosition;
             gameManager.mapGenerator.DisableMap();
             player.transform.position = playerSpawnPosition;
             var caveExitAsset = Resources.Load("Prefabs/CavernExit") as GameObject;
             GameObject caveExit = Instantiate(caveExitAsset);
-            caveExit.transform.localPosition = playerSpawnPosition;
+            caveExit.transform.localPosition = caveExitPosition;
             caveExit.transform.parent = gameManager.caveGenerator.transform;
         }
     }
@@ -53,7 +53,7 @@ public class CaveEntrance : MonoBehaviour
             if(playerInsideCave) {
                 return;
             }else {
-                if(gameManager.caveGenerator.cavesId.Contains(id)) {
+                if(gameManager.caveGenerator.cavesIds.Contains(id)) {
                     gameManager.caveGenerator.DestroyCave(id);
                 }
             }

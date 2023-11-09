@@ -130,7 +130,7 @@ public class EndlessTerrain : MonoBehaviour {
             var cavernEntrance = Resources.Load("Prefabs/CavernEntrance") as GameObject;
             for (int y = 0; y < cavernsData.cavernMap.GetLength(1); y++) {
                 for (int x = 0; x < cavernsData.cavernMap.GetLength(0); x++) {
-                    if(cavernsData.cavernMap[x,y] < 0.75f && cavernsData.cavernMap[x,y] > 0.68f && cavernsData.cavernMap[x,y] != 0f){
+                    if(cavernsData.cavernMap[x,y] < 0.65f && cavernsData.cavernMap[x,y] > 0.62f && cavernsData.cavernMap[x,y] != 0f){
                        float height = mapGenerator.meshHeightCurve.Evaluate(mapData.heightMap[x,y]) * mapGenerator.meshHeightMultiplier;
                         GameObject cavernEntrances = Instantiate(cavernEntrance, Vector3.one, Quaternion.identity);
                        Vector3 cavernEntrancesPosition = new Vector3(position.x - (MapGenerator.mapChunkSize / 2f) + x, height + cavernEntrances.transform.localScale.y, position.y + (MapGenerator.mapChunkSize/ 2f) - y);

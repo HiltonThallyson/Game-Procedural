@@ -7,8 +7,19 @@ public class PlayerInteractions : MonoBehaviour {
     GameManageScript gameManager;
     bool isInsideCave;
 
+    List<string> inventory;
+
     void Start() {
         gameManager = FindAnyObjectByType<GameManageScript>();
+        inventory = new List<string>();
+    }
+
+    public List<string> GetInventoryData() {
+        return inventory;
+    }
+
+    public void AddItemToInventory(string itemId) {
+        inventory.Add(itemId);
     }
 
     void OnTriggerStay(Collider other) {
@@ -25,6 +36,12 @@ public class PlayerInteractions : MonoBehaviour {
                 isInsideCave = !isInsideCave;
                 gameManager.ReturnToWorld();
             }
+        }
+    }
+
+    void OnTriggerEnter(Collider other) {
+        if(other.tag == "Collectable") {
+            inventory.Add(other.gameObject.GetInstanceID().ToString());
         }
     }
 

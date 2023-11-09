@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using UnityEditor.Rendering;
+using System.Collections.Specialized;
 
 public class CaveGenerator : MonoBehaviour {
     
@@ -13,19 +14,29 @@ public class CaveGenerator : MonoBehaviour {
     public bool useRandomSeed;
 
     public Vector3 caveSpawnPosition;
+    public Vector3 caveExitPosition;
 
-    public bool caveGenerated;
+    protected bool caveGenerated;
 
     [Range(0,57)]
     public int randomFillPercentage;
+    PlayerInteractions playerInteractions;
 
     int[,] map;
-    public List<string> cavesId;
-
+    public List<string> cavesIds;
+    public Dictionary<string, CaveInfo> cavesInfoDictionary;
     public CaveMeshGenerator meshGenerator;
 
+    void Start() {
+        cavesIds = new List<string>();
+        cavesInfoDictionary = new Dictionary<string, CaveInfo>();
+        playerInteractions = FindAnyObjectByType<PlayerInteractions>();
+    }
+
     void AddGeneratedCave(string id) {
-        cavesId.Add(id);
+        if(!cavesIds.Contains(id)) {
+            cavesIds.Add(id);    
+        }
     }
     public void GenerateCave(string id) {
         
@@ -37,9 +48,9 @@ public class CaveGenerator : MonoBehaviour {
             SmoothMap();
         }
 
-        ProcessMap();
+        ProcessMap(id, map);
 
-        int borderSize = 1;
+        int borderSize = 2;
         int[,] borderedMap = new int[width + borderSize * 2, height + borderSize * 2];
 
         for(int x = 0; x < borderedMap.GetLength(0); x++) {
@@ -53,15 +64,59 @@ public class CaveGenerator : MonoBehaviour {
         }
 
         AddGeneratedCave(id);
+        
         meshGenerator = GetComponent<CaveMeshGenerator>();
         meshGenerator.GenerateMesh(borderedMap, 1);
         caveGenerated = true;
     }
 
+    void CreateCaveCollectables(string caveId, int[,] caveMap, List<Room> rooms) {
+        int caveWidth = caveMap.GetLength(0);
+        int caveHeight = caveMap.GetLength(1);
+        float[,] collectableNoiseMap =  CollectablesGenerator.GenerateNoise(caveId, caveWidth, caveHeight);
+        CaveInfo caveInfo = new CaveInfo();
+        
+        foreach(Room room in rooms) {
+            foreach(Coord tile in room.tiles) {
+                int xCoord = tile.tileX;
+                int yCoord = tile.tileY;
+                if(map[xCoord, yCoord] == 0 && collectableNoiseMap[xCoord, yCoord] > 0.4 && collectableNoiseMap[xCoord, yCoord] < 0.5) { 
+                    var collectableAsset = Resources.Load("Prefabs/Collectable");
+                    var collectable = Instantiate(collectableAsset) as GameObject;
+                    string collectableId = collectable.GetInstanceID().ToString();
+                    Debug.Log(playerInteractions.GetInventoryData().Contains(collectableId));
+                    if(playerInteractions.GetInventoryData().Contains(collectableId)) {
+                        continue;
+                    }
+                    Vector3 position = new Vector3(xCoord - caveWidth / 2 , -7 , yCoord - caveHeight/2);
+                    collectable.transform.parent = gameObject.transform;
+                    collectable.transform.localScale = Vector3.one * 5;
+                    collectable.transform.localPosition = position;
+                    // // string collectableId = collectable.GetInstanceID().ToString();
+                    // CollectableInfo collectableInfo = new CollectableInfo("1", position);
+                    // caveInfo.AddCollectable(collectableInfo);
+                    // caveInfo.AddCollectable(collectableInfo);
+                    // cavesInfoDictionary.Add(caveId, caveInfo);
+                    playerInteractions.AddItemToInventory(collectableId);
+                }
+            }
+        }
+       
+
+          
+    }
+
     public void DestroyCave(string id) {
-        if(cavesId.Contains(id)) {
+        if(cavesIds.Contains(id)) {
             if(meshGenerator != null) {
+                
                 meshGenerator.DestroyMesh();
+                var collectables = GetComponentsInChildren<Collectable>();
+                foreach(Collectable collectable in collectables) {
+                    if(collectable.tag == "Collectable") {
+                        Destroy(collectable.gameObject);
+                    }
+                }
                 RemoveGeneratedCave(id);
                 caveGenerated = false;
             }
@@ -69,7 +124,7 @@ public class CaveGenerator : MonoBehaviour {
     }
 
     void RemoveGeneratedCave(string id) {
-        cavesId.Remove(id);
+        cavesIds.Remove(id);
     } 
 
     protected void GetPlayerSpawnPosition(List<Room> allRooms) {
@@ -80,7 +135,8 @@ public class CaveGenerator : MonoBehaviour {
                     int yCoord = tile.tileY;
                     if(map[xCoord, yCoord] == 0) {
                         if(map[xCoord, yCoord] == 0)
-                        caveSpawnPosition = new Vector3(xCoord/10, -8 - 13, yCoord/10);
+                        caveSpawnPosition = new Vector3(xCoord/10, -8 -13, yCoord/10);
+                        caveExitPosition = new Vector3(xCoord/10, -8 -11, yCoord/10);
                         return;
                     }
                 }
@@ -88,7 +144,7 @@ public class CaveGenerator : MonoBehaviour {
         }
     }
 
-    void ProcessMap() {
+    void ProcessMap(string caveId, int[,] caveMap) {
         List<List<Coord>> wallRegions = GetRegions(1);
 
         int wallThresholdSize = 50;
@@ -123,6 +179,8 @@ public class CaveGenerator : MonoBehaviour {
 
         GetPlayerSpawnPosition(survivingRooms);
         ConnectClosestRooms(survivingRooms);
+        CreateCaveCollectables(caveId, caveMap, survivingRooms);
+        
     }
 
     void ConnectClosestRooms(List<Room> allRooms, bool forceAccessbilityFromMainRoom = false) {
@@ -438,4 +496,36 @@ public class CaveGenerator : MonoBehaviour {
 }
     
 
+}
+
+public class CaveInfo{
+    public List<CollectableInfo> collectables;
+    public List<CollectableInfo> removedCollectables;
+
+    public CaveInfo()
+    {
+        
+    }
+
+    public void AddCollectable (CollectableInfo collectableInfo) {
+        collectables.Add(collectableInfo);
+    }
+
+    public void RemoveColllectable(CollectableInfo collectable) {
+        if(collectables.Contains(collectable)) {
+            removedCollectables.Add(collectable);
+            collectables.Remove(collectable);
+        }
+    }
+}
+
+public class CollectableInfo {
+    public string id;
+    public Vector3 coord;
+
+    public CollectableInfo(string id, Vector3 coord)
+    {
+        this.id = id;
+        this.coord = coord;
+    }
 }

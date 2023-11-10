@@ -84,7 +84,6 @@ public class CaveGenerator : MonoBehaviour {
                     var collectableAsset = Resources.Load("Prefabs/Collectable");
                     var collectable = Instantiate(collectableAsset) as GameObject;
                     string collectableId = xCoord.ToString() +  collectableNoiseMap[xCoord, yCoord].ToString()+ yCoord.ToString();
-                    Debug.Log(playerInteractions.GetInventoryData().Contains(collectableId));
                     if(playerInteractions.GetInventoryData().Contains(collectableId)) {
                         Destroy(collectable);
                         continue;

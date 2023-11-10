@@ -11,7 +11,6 @@ public class PlayerInteractions : MonoBehaviour {
     void Start() {
         gameManager = FindAnyObjectByType<GameManageScript>();
         inventory = new List<string>();
-        Debug.Log(inventory.Count);
         coinText.text = "Coins: " + inventory.Count.ToString();
     }
 

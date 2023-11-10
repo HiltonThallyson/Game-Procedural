@@ -10,19 +10,29 @@ public class GameManageScript : MonoBehaviour {
     public GameObject player;
     Vector3 playerLastPosition;
     bool isPlayerInsideCave;
+    bool caveGenerated;
 
     void Start() {
         endlessTerrain = FindAnyObjectByType<EndlessTerrain>();
         GenerateMap();
         isPlayerInsideCave = false;
+        caveGenerated = false;
     }
 
-    public void setIsPlayerInCave(bool isInside) {
+    public void SetIsPlayerInCave(bool isInside) {
         isPlayerInsideCave = isInside;
     }
 
     public bool CheckIfPlayerIsInCave(){
         return isPlayerInsideCave;
+    }
+
+    public void SetCaveIsGenerated(bool isGenerated) {
+        caveGenerated = isGenerated;
+    }
+
+    public bool CheckIfCaveIsGenerated() {
+        return caveGenerated;
     }
 
      void  GenerateMap() {
@@ -39,7 +49,7 @@ public class GameManageScript : MonoBehaviour {
 
     public void ReturnToWorld() {
         mapGenerator.EnabledMap();
-        setIsPlayerInCave(false);
+        SetIsPlayerInCave(false);
         player.transform.position = playerLastPosition;
     }
 

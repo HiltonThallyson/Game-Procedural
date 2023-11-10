@@ -7,24 +7,15 @@ public class CaveEntrance : MonoBehaviour
 {
     string id;
     GameManageScript gameManager;
-    bool playerInsideCave;
     
     void Start()
     {
-        id = GetInstanceID().ToString();
+        id = "Cave Id " + gameObject.transform.position.x.ToString() + gameObject.transform.position.y.ToString() + gameObject.transform.position.z.ToString();
         gameManager = FindAnyObjectByType<GameManageScript>();
-        playerInsideCave = gameManager.CheckIfPlayerIsInCave();
-    }
-
-    void FixedUpdate() {
-        if(gameManager.CheckIfPlayerIsInCave() != playerInsideCave) {
-            playerInsideCave = gameManager.CheckIfPlayerIsInCave();
-        }
     }
 
     public void SetPlayerPosition(Rigidbody player) {
-        if(!playerInsideCave) {
-            gameManager.setIsPlayerInCave(true);
+        if(!gameManager.CheckIfPlayerIsInCave()) {
             gameManager.SetPlayerLastPosition(player.transform.position);
             var playerSpawnPosition = gameManager.caveGenerator.caveSpawnPosition;
             var caveExitPosition = gameManager.caveGenerator.caveExitPosition;
@@ -41,19 +32,22 @@ public class CaveEntrance : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) {
         if(other.tag == "Player") {
-            gameManager.GenerateCave(id);
+            if(!gameManager.CheckIfCaveIsGenerated()) {
+                gameManager.GenerateCave(id);
+                gameManager.SetCaveIsGenerated(true);
+            }
         }
     }
 
     
 
     private void OnTriggerExit(Collider other) {
-
         if(other.tag == "Player") {
-            if(playerInsideCave) {
+            if(gameManager.CheckIfPlayerIsInCave()) {
                 return;
             }else {
                 if(gameManager.caveGenerator.cavesIds.Contains(id)) {
+                    gameManager.SetCaveIsGenerated(false);
                     gameManager.caveGenerator.DestroyCave(id);
                 }
             }
@@ -61,13 +55,5 @@ public class CaveEntrance : MonoBehaviour
     }
 }
 
-// public struct CaveEntranceCoord {
-//     public float xCoord;
-//     public float yCoord;
 
-//     public CaveEntranceCoord(float xCoord, float yCoord)
-//     {
-//         this.xCoord = xCoord;
-//         this.yCoord = yCoord;
-//     }
 

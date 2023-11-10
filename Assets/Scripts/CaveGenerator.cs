@@ -83,21 +83,23 @@ public class CaveGenerator : MonoBehaviour {
                 if(map[xCoord, yCoord] == 0 && collectableNoiseMap[xCoord, yCoord] > 0.4 && collectableNoiseMap[xCoord, yCoord] < 0.5) { 
                     var collectableAsset = Resources.Load("Prefabs/Collectable");
                     var collectable = Instantiate(collectableAsset) as GameObject;
-                    string collectableId = collectable.GetInstanceID().ToString();
+                    string collectableId = xCoord.ToString() +  collectableNoiseMap[xCoord, yCoord].ToString()+ yCoord.ToString();
                     Debug.Log(playerInteractions.GetInventoryData().Contains(collectableId));
                     if(playerInteractions.GetInventoryData().Contains(collectableId)) {
+                        Destroy(collectable);
                         continue;
                     }
                     Vector3 position = new Vector3(xCoord - caveWidth / 2 , -7 , yCoord - caveHeight/2);
                     collectable.transform.parent = gameObject.transform;
                     collectable.transform.localScale = Vector3.one * 5;
                     collectable.transform.localPosition = position;
+                    collectable.GetComponent<Collectable>().SetItemId(collectableId);
                     // // string collectableId = collectable.GetInstanceID().ToString();
                     // CollectableInfo collectableInfo = new CollectableInfo("1", position);
                     // caveInfo.AddCollectable(collectableInfo);
                     // caveInfo.AddCollectable(collectableInfo);
                     // cavesInfoDictionary.Add(caveId, caveInfo);
-                    playerInteractions.AddItemToInventory(collectableId);
+                    
                 }
             }
         }

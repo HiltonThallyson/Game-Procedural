@@ -4,15 +4,13 @@ using UnityEngine;
 
 public class Collectable : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+    string id;
+
+    public void SetItemId(string itemId) {
+        id = itemId;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    public string GetItemId() {
+        return id;
     }
 }
